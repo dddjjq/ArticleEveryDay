@@ -3,13 +3,13 @@ package com.welson.artcleeveryday.entity;
 import java.util.ArrayList;
 
 public class MainDatas {
-    private ArrayList<MainData> data;
+    private MainData data;
 
-    public ArrayList<MainData> getData() {
+    public MainData getData() {
         return data;
     }
 
-    public void setData(ArrayList<MainData> data) {
+    public void setData(MainData data) {
         this.data = data;
     }
 }

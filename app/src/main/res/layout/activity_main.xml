@@ -6,7 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <include
-        layout="@layout/main_layout"/>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:id="@+id/main_layout">
+        <com.welson.artcleeveryday.view.MainToolbar
+            android:id="@+id/main_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            app:contentInsetEnd="0dp"
+            app:contentInsetLeft="0dp"
+            app:contentInsetRight="0dp"
+            app:contentInsetStart="0dp">
 
+        </com.welson.artcleeveryday.view.MainToolbar>
+
+        <include
+            layout="@layout/main_layout"/>
+    </LinearLayout>
+    <include
+        layout="@layout/left_layout" />
 </RelativeLayout>

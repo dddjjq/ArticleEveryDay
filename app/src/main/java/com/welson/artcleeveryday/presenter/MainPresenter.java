@@ -3,6 +3,7 @@ package com.welson.artcleeveryday.presenter;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.welson.artcleeveryday.constants.Constants;
 import com.welson.artcleeveryday.entity.MainData;
 import com.welson.artcleeveryday.entity.MainDatas;
 import com.welson.artcleeveryday.retrofit.RetrofitHelper;
@@ -81,8 +82,6 @@ public class MainPresenter implements BasePresenter{
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     String responseData = response.body().string();
-                    Log.d(TAG,responseData);
-                    //parseJson(responseData);
                 }
             });
         }
@@ -91,17 +90,19 @@ public class MainPresenter implements BasePresenter{
     private Runnable todayArticleRunnableHttpURL = new Runnable() {
         @Override
         public void run() {
-            String result = HttpUtil.getHttpURLConnection("https://interface.meiriyiwen.com/article/today");
-            Log.d(TAG,result);
+            String result = HttpUtil.getHttpURLConnection(Constants.BASE_URL+Constants.TODAY);
+            if (!result.equals("")){
+                baseView.showSuccess(parseJson(result));
+            }else {
+                baseView.showError();
+            }
         }
     };
 
-    private void parseJson(String data){
+    private MainData parseJson(String data){
         Gson gson = new Gson();
         MainDatas mainDatas = gson.fromJson(data,MainDatas.class);
-        MainData mainData = mainDatas.getData().get(0);
-        //for (MainDatas mainData : mainDatas){
-            Log.d(TAG,"mainData : " + mainData.getAuthor());
-        //}
+        MainData mainData = mainDatas.getData();
+        return mainData;
     }
 }
