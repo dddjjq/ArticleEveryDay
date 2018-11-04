@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="RightButton">
+        <attr name="image" format="reference"/>
+        <attr name="text" format="string"/>
+    </declare-styleable>
+    <style name="right_dialog_anim">
+        <item name="android:windowEnterAnimation">@anim/right_dialog_enter</item>
+        <item name="android:windowExitAnimation">@anim/right_dialog_exit</item>
+    </style>
+</resources>

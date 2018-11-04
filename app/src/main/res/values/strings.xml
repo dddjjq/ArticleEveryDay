@@ -7,4 +7,10 @@
     <string name="left_collect">我的收藏</string>
     <string name="left_setting">阅读设置</string>
     <string name="left_zan">给个好评</string>
+    <string name="right_collect">收藏</string>
+    <string name="right_share">分享</string>
+    <string name="right_before">前一天</string>
+    <string name="right_random">随机</string>
+    <string name="right_next">后一天</string>
+    <string name="right_today">今日</string>
 </resources>

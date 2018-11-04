@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="70dp"
+    android:layout_height="match_parent"
+    android:background="#2A2A29"
+    android:layout_alignParentEnd="true"
+    android:orientation="vertical"
+    android:gravity="center_horizontal">
+
+
+    <com.welson.artcleeveryday.view.RightButton
+        android:layout_marginTop="40dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:image="@drawable/right_collect_icon"
+        app:text="@string/right_collect"/>
+    <com.welson.artcleeveryday.view.RightButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:image="@drawable/right_share_icon"
+        app:text="@string/right_share"
+        android:layout_marginTop="10dp"/>
+    <com.welson.artcleeveryday.view.RightButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:image="@drawable/right_before_icon"
+        app:text="@string/right_before"
+        android:layout_marginTop="10dp"/>
+    <com.welson.artcleeveryday.view.RightButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:image="@drawable/right_random_icon"
+        app:text="@string/right_random"
+        android:layout_marginTop="10dp"/>
+    <com.welson.artcleeveryday.view.RightButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:image="@drawable/right_next_icon"
+        app:text="@string/right_next"
+        android:layout_marginTop="10dp"/>
+    <com.welson.artcleeveryday.view.RightButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:image="@drawable/right_today_icon"
+        app:text="@string/right_today"
+        android:layout_marginTop="10dp"/>
+</LinearLayout>

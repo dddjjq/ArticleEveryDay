@@ -4,6 +4,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -18,6 +20,7 @@ import com.welson.artcleeveryday.entity.MainData;
 import com.welson.artcleeveryday.presenter.MainPresenter;
 import com.welson.artcleeveryday.util.StringUtil;
 import com.welson.artcleeveryday.view.BaseView;
+import com.welson.artcleeveryday.view.MainLinearLayout;
 import com.welson.artcleeveryday.view.MainScrollView;
 import com.welson.artcleeveryday.view.MainToolbar;
 
@@ -29,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     private static final String TAG = MainActivity.class.getSimpleName() + "-TAG";
     private TextView title,author,content,footer;
     private MainToolbar mainToolbar;
-    private LinearLayout mainLayout;
+    private MainLinearLayout mainLayout;
     private LinearLayout leftLayout;
     private LinearLayout articleLayout;
     private MainScrollView scrollView;
@@ -40,8 +43,12 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     private static final int OPEN = 0;
     private static final int CLOSE = 1;
     public static boolean isLeftMenuOpen = false;
-    private static final int leftMaxWidth = 390; //左边栏宽度
-    private int dx;
+    public static final int leftMaxWidth = 394; //左边栏宽度
+    private int dx = 0;
+    float oldX = 0;
+    private static final int scrollPeriod = 500;
+    private boolean canMove = false;
+    private RightDialogFragment fragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +57,12 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         initView();
         initData();
         initListener();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fragment = new RightDialogFragment();
     }
 
     private void initView(){
@@ -74,35 +87,6 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         width = displayMetrics.widthPixels;
         height = displayMetrics.heightPixels;
         handler = new LayoutHandler(this);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        float oldX = 0;
-        switch (event.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                oldX = event.getX();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                dx = (int)(event.getX() - oldX);
-                Log.d("dingyl","dx" + dx);
-                if (dx < leftMaxWidth){
-                    leftLayout.layout(-leftLayout.getWidth()+dx,leftLayout.getTop(),dx,leftLayout.getHeight());
-                    mainLayout.layout(dx,mainLayout.getTop(),dx+mainLayout.getWidth(),mainLayout.getHeight());
-                    leftLayout.invalidate();
-                    mainLayout.invalidate();
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                if (dx > leftMaxWidth/2){
-                    openLeftLayout();
-                }else {
-                    closeLeftLayout();
-                }
-                dx = 0;
-                break;
-        }
-        return super.onTouchEvent(event);
     }
 
     private void initListener(){
@@ -156,22 +140,82 @@ public class MainActivity extends AppCompatActivity implements BaseView,
 
     @Override
     public void onRightClick() {
-
+        /*FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction transaction = manager.beginTransaction();
+        transaction.add(R.id.dialog,fragment);
+        transaction.commit();*/
+        fragment.show(getSupportFragmentManager(),"Dialog");
     }
 
-    private void openLeftLayout(){
-        leftLayout.layout(0,leftLayout.getTop(),leftMaxWidth,leftLayout.getHeight());
-        mainLayout.layout(leftMaxWidth,mainLayout.getTop(),leftMaxWidth+mainLayout.getWidth(),mainLayout.getHeight());
-        leftLayout.postInvalidateDelayed(300);
-        mainLayout.postInvalidateDelayed(300);
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                oldX = event.getRawX();
+                if (oldX > mainLayout.getLeft() && oldX < mainLayout.getLeft() + leftMaxWidth){
+                    canMove = true;
+                }else {
+                    canMove = false;
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                dx = (int)(event.getRawX() - oldX);
+
+                if (dx < leftMaxWidth && canMove && dx > 0 && !isLeftMenuOpen){
+                    //Log.d("dingyl","lef : " + leftLayout.getMeasuredWidth());
+                    /*leftLayout.layout(-leftLayout.getWidth()+dx,leftLayout.getTop(),dx,leftLayout.getHeight());
+                    mainLayout.layout(dx,mainLayout.getTop(),dx+mainLayout.getWidth(),mainLayout.getHeight());
+                    leftLayout.invalidate();
+                    mainLayout.invalidate();*/
+                    AnimatorSet animatorSet = new AnimatorSet();
+                    ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",dx);
+                    ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",dx);
+                    animatorSet.play(animator1).with(animator2);
+                    animatorSet.setDuration(0);
+                    animatorSet.start();
+                }
+                if (dx < 0 && dx > -leftMaxWidth && isLeftMenuOpen){
+                    AnimatorSet animatorSet = new AnimatorSet();
+                    ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",leftMaxWidth+dx);
+                    ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",leftMaxWidth+dx);
+                    animatorSet.play(animator1).with(animator2);
+                    animatorSet.setDuration(0);
+                    animatorSet.start();
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (dx >= leftMaxWidth/2){
+                    openLeftLayout(leftMaxWidth-dx);
+                }else if (dx > 0 && dx < leftMaxWidth/2){
+                    closeLeftLayout(dx);
+                }else if (dx < 0 && dx > -leftMaxWidth/2){
+                    openLeftLayout(-dx);
+                }else {
+                    closeLeftLayout(leftMaxWidth+dx);
+                }
+                break;
+        }
+        return super.onTouchEvent(event);
+    }
+
+
+    public void openLeftLayout(int x){
+        AnimatorSet animatorSet = new AnimatorSet();
+        ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",leftMaxWidth);
+        ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",leftMaxWidth);
+        animatorSet.play(animator1).with(animator2);
+        animatorSet.setDuration(getPeriodTime(x));
+        animatorSet.start();
         isLeftMenuOpen = true;
     }
 
-    private void closeLeftLayout(){
-        leftLayout.layout(-leftLayout.getWidth(),leftLayout.getTop(),0,leftLayout.getHeight());
-        mainLayout.layout(0,mainLayout.getTop(),mainLayout.getWidth(),mainLayout.getHeight());
-        leftLayout.postInvalidateDelayed(300);
-        mainLayout.postInvalidateDelayed(300);
+    public void closeLeftLayout(int x){
+        AnimatorSet animatorSet = new AnimatorSet();
+        ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",0);
+        ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",0);
+        animatorSet.play(animator1).with(animator2);
+        animatorSet.setDuration(getPeriodTime(x));
+        animatorSet.start();
         isLeftMenuOpen = false;
     }
 
@@ -183,7 +227,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",leftMaxWidth);
         ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",leftMaxWidth);
         animatorSet.play(animator1).with(animator2);
-        animatorSet.setDuration(400);
+        animatorSet.setDuration(scrollPeriod);
         animatorSet.start();
         isLeftMenuOpen = true;
         //handler.removeMessages(CLOSE);
@@ -192,10 +236,10 @@ public class MainActivity extends AppCompatActivity implements BaseView,
 
     private void smoothCloseLeftLayout(){
         AnimatorSet animatorSet = new AnimatorSet();
-        ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",-leftMaxWidth);
-        ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",-leftMaxWidth);
+        ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",0);
+        ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",0);
         animatorSet.play(animator1).with(animator2);
-        animatorSet.setDuration(400);
+        animatorSet.setDuration(scrollPeriod);
         animatorSet.start();
         isLeftMenuOpen = false;
         //handler.removeMessages(OPEN);
@@ -246,5 +290,15 @@ public class MainActivity extends AppCompatActivity implements BaseView,
                     break;
             }
         }
+    }
+
+    /**
+     *  根据距离获取滑动时间
+     */
+    private int getPeriodTime(int x){
+        if (x < 0){
+            return 0;
+        }
+        return (int)((x * 1.0/leftMaxWidth)*scrollPeriod);
     }
 }
