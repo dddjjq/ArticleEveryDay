@@ -1,21 +1,20 @@
-package com.welson.artcleeveryday;
+package com.welson.artcleeveryday.activity;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.welson.artcleeveryday.R;
+import com.welson.artcleeveryday.fragment.RightDialogFragment;
 import com.welson.artcleeveryday.entity.MainData;
 import com.welson.artcleeveryday.presenter.MainPresenter;
 import com.welson.artcleeveryday.util.StringUtil;
@@ -36,7 +35,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     private LinearLayout leftLayout;
     private LinearLayout articleLayout;
     private MainScrollView scrollView;
-    private MainPresenter presenter;
+    public MainPresenter presenter;
     private String titleStr,authorStr,contentStr,footerStr;
     private static int width,height;//屏幕宽度和高度
     private LayoutHandler handler;
@@ -46,22 +45,23 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     public static final int leftMaxWidth = 394; //左边栏宽度
     private int dx = 0;
     float oldX = 0;
-    private static final int scrollPeriod = 500;
+    private static final int scrollPeriod = 350;
     private boolean canMove = false;
     private RightDialogFragment fragment;
+    private int touchSlop;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
-        initData();
         initListener();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        initData();
         fragment = new RightDialogFragment();
     }
 
@@ -81,12 +81,14 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     }
 
     private void initData(){
-        presenter = new MainPresenter(this);
+        scrollView.setVisibility(View.GONE);
+        presenter = new MainPresenter(this,this);
         presenter.requestData();
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         width = displayMetrics.widthPixels;
         height = displayMetrics.heightPixels;
         handler = new LayoutHandler(this);
+        touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
     }
 
     private void initListener(){
@@ -109,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     }
     @Override
     public void showSuccess(MainData mainData) {
+        scrollView.setVisibility(View.VISIBLE);
         titleStr = mainData.getTitle();
         authorStr = mainData.getAuthor();
         contentStr = StringUtil.getRealString(mainData.getContent());
@@ -161,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
             case MotionEvent.ACTION_MOVE:
                 dx = (int)(event.getRawX() - oldX);
 
-                if (dx < leftMaxWidth && canMove && dx > 0 && !isLeftMenuOpen){
+                if (dx < leftMaxWidth && canMove && dx >= touchSlop && !isLeftMenuOpen){
                     //Log.d("dingyl","lef : " + leftLayout.getMeasuredWidth());
                     /*leftLayout.layout(-leftLayout.getWidth()+dx,leftLayout.getTop(),dx,leftLayout.getHeight());
                     mainLayout.layout(dx,mainLayout.getTop(),dx+mainLayout.getWidth(),mainLayout.getHeight());
@@ -174,7 +177,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
                     animatorSet.setDuration(0);
                     animatorSet.start();
                 }
-                if (dx < 0 && dx > -leftMaxWidth && isLeftMenuOpen){
+                if (dx <= -touchSlop && dx > -leftMaxWidth && isLeftMenuOpen){
                     AnimatorSet animatorSet = new AnimatorSet();
                     ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",leftMaxWidth+dx);
                     ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",leftMaxWidth+dx);
@@ -186,11 +189,11 @@ public class MainActivity extends AppCompatActivity implements BaseView,
             case MotionEvent.ACTION_UP:
                 if (dx >= leftMaxWidth/2){
                     openLeftLayout(leftMaxWidth-dx);
-                }else if (dx > 0 && dx < leftMaxWidth/2){
+                }else if (dx >= touchSlop && dx < leftMaxWidth/2){
                     closeLeftLayout(dx);
-                }else if (dx < 0 && dx > -leftMaxWidth/2){
+                }else if (dx <= -touchSlop && dx >= -leftMaxWidth/2){
                     openLeftLayout(-dx);
-                }else {
+                }else if (dx < -leftMaxWidth/2){
                     closeLeftLayout(leftMaxWidth+dx);
                 }
                 break;
@@ -300,5 +303,9 @@ public class MainActivity extends AppCompatActivity implements BaseView,
             return 0;
         }
         return (int)((x * 1.0/leftMaxWidth)*scrollPeriod);
+    }
+
+    public void scrollToTop(){
+        scrollView.fullScroll(View.FOCUS_UP);
     }
 }

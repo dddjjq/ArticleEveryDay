@@ -10,36 +10,42 @@
 
 
     <com.welson.artcleeveryday.view.RightButton
+        android:id="@+id/collect_button"
         android:layout_marginTop="40dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:image="@drawable/right_collect_icon"
         app:text="@string/right_collect"/>
     <com.welson.artcleeveryday.view.RightButton
+        android:id="@+id/share_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:image="@drawable/right_share_icon"
         app:text="@string/right_share"
         android:layout_marginTop="10dp"/>
     <com.welson.artcleeveryday.view.RightButton
+        android:id="@+id/before_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:image="@drawable/right_before_icon"
         app:text="@string/right_before"
         android:layout_marginTop="10dp"/>
     <com.welson.artcleeveryday.view.RightButton
+        android:id="@+id/random_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:image="@drawable/right_random_icon"
         app:text="@string/right_random"
         android:layout_marginTop="10dp"/>
     <com.welson.artcleeveryday.view.RightButton
+        android:id="@+id/next_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:image="@drawable/right_next_icon"
         app:text="@string/right_next"
         android:layout_marginTop="10dp"/>
     <com.welson.artcleeveryday.view.RightButton
+        android:id="@+id/today_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:image="@drawable/right_today_icon"

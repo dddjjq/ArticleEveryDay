@@ -1,5 +1,6 @@
 package com.welson.artcleeveryday.presenter;
 
+import android.content.Context;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -8,6 +9,7 @@ import com.welson.artcleeveryday.entity.MainData;
 import com.welson.artcleeveryday.entity.MainDatas;
 import com.welson.artcleeveryday.retrofit.RetrofitHelper;
 import com.welson.artcleeveryday.util.HttpUtil;
+import com.welson.artcleeveryday.util.SharedPreferenceUtil;
 import com.welson.artcleeveryday.view.BaseView;
 
 import java.io.IOException;
@@ -30,10 +32,13 @@ public class MainPresenter implements BasePresenter{
     private BaseView baseView;
     private ExecutorService singleExecutor;
     private MainDatas mainDatas;
+    private SharedPreferenceUtil sharedPreferenceUtil;
+    private String date;
 
-    public MainPresenter(BaseView baseView){
+    public MainPresenter(BaseView baseView, Context context){
         this.baseView = baseView;
         singleExecutor = Executors.newSingleThreadExecutor();
+        sharedPreferenceUtil = new SharedPreferenceUtil(context);
     }
 
     @Override
@@ -70,6 +75,18 @@ public class MainPresenter implements BasePresenter{
                 });*/
     }
 
+    public void requestDataRandom(){
+        singleExecutor.execute(randomArticleRunnable);
+    }
+
+    public void requestDateBefore(){
+        singleExecutor.execute(beforeArticleRunnable);
+    }
+
+    public void requestDateNext(){
+        singleExecutor.execute(nextArticleRunnable);
+    }
+
     private Runnable todayArticleRunnable = new Runnable() {
         @Override
         public void run() {
@@ -93,6 +110,49 @@ public class MainPresenter implements BasePresenter{
             String result = HttpUtil.getHttpURLConnection(Constants.BASE_URL+Constants.TODAY);
             if (!result.equals("")){
                 baseView.showSuccess(parseJson(result));
+                sharedPreferenceUtil.setTodayDate(parseJson(result).getDate().getCurr()+"");
+                saveSharedPreference(result);
+            }else {
+                baseView.showError();
+            }
+        }
+    };
+
+    private Runnable randomArticleRunnable = new Runnable() {
+        @Override
+        public void run() {
+            String result = HttpUtil.getHttpURLConnection(Constants.BASE_URL+Constants.RANDOM);
+            if (!result.equals("")){
+                baseView.showSuccess(parseJson(result));
+                saveSharedPreference(result);
+            }else {
+                baseView.showError();
+            }
+        }
+    };
+
+    private Runnable beforeArticleRunnable = new Runnable() {
+        @Override
+        public void run() {
+            String result = HttpUtil.getHttpURLConnection(Constants.BASE_URL
+                    +Constants.DATE_ARTICLE+sharedPreferenceUtil.getBeforeDate());
+            if (!result.equals("")){
+                baseView.showSuccess(parseJson(result));
+                saveSharedPreference(result);
+            }else {
+                baseView.showError();
+            }
+        }
+    };
+
+    private Runnable nextArticleRunnable = new Runnable() {
+        @Override
+        public void run() {
+            String result = HttpUtil.getHttpURLConnection(Constants.BASE_URL
+                    +Constants.DATE_ARTICLE+sharedPreferenceUtil.getNextDate());
+            if (!result.equals("")){
+                baseView.showSuccess(parseJson(result));
+                saveSharedPreference(result);
             }else {
                 baseView.showError();
             }
@@ -102,7 +162,12 @@ public class MainPresenter implements BasePresenter{
     private MainData parseJson(String data){
         Gson gson = new Gson();
         MainDatas mainDatas = gson.fromJson(data,MainDatas.class);
-        MainData mainData = mainDatas.getData();
-        return mainData;
+        return mainDatas.getData();
+    }
+
+    private void saveSharedPreference(String result){
+        sharedPreferenceUtil.setCurrentDate(parseJson(result).getDate().getCurr()+"");
+        sharedPreferenceUtil.setBeforeDate(parseJson(result).getDate().getPrev()+"");
+        sharedPreferenceUtil.setNextDate(parseJson(result).getDate().getNext()+"");
     }
 }

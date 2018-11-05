@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
+        android:background="#f7f7f7"
         android:id="@+id/article_layout">
 
         <TextView

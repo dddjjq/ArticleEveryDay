@@ -1,13 +1,11 @@
 package com.welson.artcleeveryday.view;
 
 import android.content.Context;
-import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.ScrollView;
 
-import com.welson.artcleeveryday.MainActivity;
+import com.welson.artcleeveryday.activity.MainActivity;
 
 public class MainScrollView extends ScrollView {
 
