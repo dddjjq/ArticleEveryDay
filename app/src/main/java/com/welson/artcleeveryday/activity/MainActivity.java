@@ -2,11 +2,13 @@ package com.welson.artcleeveryday.activity;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -17,6 +19,7 @@ import com.welson.artcleeveryday.R;
 import com.welson.artcleeveryday.fragment.RightDialogFragment;
 import com.welson.artcleeveryday.entity.MainData;
 import com.welson.artcleeveryday.presenter.MainPresenter;
+import com.welson.artcleeveryday.util.DensityUtil;
 import com.welson.artcleeveryday.util.StringUtil;
 import com.welson.artcleeveryday.view.BaseView;
 import com.welson.artcleeveryday.view.MainLinearLayout;
@@ -63,7 +66,9 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         super.onResume();
         initData();
         fragment = new RightDialogFragment();
+        hideBottomUiMenu();
     }
+
 
     private void initView(){
         title = findViewById(R.id.title);
@@ -88,7 +93,8 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         width = displayMetrics.widthPixels;
         height = displayMetrics.heightPixels;
         handler = new LayoutHandler(this);
-        touchSlop = ViewConfiguration.get(this).getScaledTouchSlop();
+        touchSlop = DensityUtil.dp2px(this,ViewConfiguration.get(this).getScaledTouchSlop()) ;
+        Log.d("dingyl",touchSlop+"");
     }
 
     private void initListener(){
@@ -111,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     }
     @Override
     public void showSuccess(MainData mainData) {
-        scrollView.setVisibility(View.VISIBLE);
         titleStr = mainData.getTitle();
         authorStr = mainData.getAuthor();
         contentStr = StringUtil.getRealString(mainData.getContent());
@@ -119,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                scrollView.setVisibility(View.VISIBLE);
                 title.setText(titleStr);
                 author.setText(authorStr);
                 content.setText(contentStr);
@@ -148,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         transaction.add(R.id.dialog,fragment);
         transaction.commit();*/
         fragment.show(getSupportFragmentManager(),"Dialog");
+        hideBottomUiMenu();
     }
 
     @Override
@@ -187,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
                 }
                 break;
             case MotionEvent.ACTION_UP:
+                Log.d("dingyl",dx+"dx");
                 if (dx >= leftMaxWidth/2){
                     openLeftLayout(leftMaxWidth-dx);
                 }else if (dx >= touchSlop && dx < leftMaxWidth/2){
@@ -213,6 +221,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     }
 
     public void closeLeftLayout(int x){
+        Log.d("dingyl","closeLeftLayout x : " + x);
         AnimatorSet animatorSet = new AnimatorSet();
         ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",0);
         ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",0);
@@ -295,6 +304,17 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         }
     }
 
+    private void hideBottomUiMenu(){
+        if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19){
+            View view = this.getWindow().getDecorView();
+            view.setSystemUiVisibility(View.GONE);
+        }else if (Build.VERSION.SDK_INT >= 19){
+            View decorView = getWindow().getDecorView();
+            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            decorView.setSystemUiVisibility(uiOptions);
+        }
+    }
+
     /**
      *  根据距离获取滑动时间
      */
@@ -302,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         if (x < 0){
             return 0;
         }
-        return (int)((x * 1.0/leftMaxWidth)*scrollPeriod);
+        return (int)((1 - x * 1.0/leftMaxWidth)*scrollPeriod);
     }
 
     public void scrollToTop(){
