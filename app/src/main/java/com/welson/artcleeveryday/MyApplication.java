@@ -14,5 +14,9 @@ public class MyApplication extends Application {
         databaseUtil = new DatabaseUtil(this);
     }
 
-
+    @Override
+    public void onTerminate() {
+        super.onTerminate();
+        databaseUtil.closeDatabase();
+    }
 }
