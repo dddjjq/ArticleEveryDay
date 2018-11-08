@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     private boolean canMove = false;
     private RightDialogFragment fragment;
     private int touchSlop;
+    public MainData currData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +67,8 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         super.onResume();
         initData();
         fragment = new RightDialogFragment();
-        hideBottomUiMenu();
+        //hideBottomUiMenu();
+        //TODO for bottom UI
     }
 
 
@@ -117,6 +119,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     }
     @Override
     public void showSuccess(MainData mainData) {
+        currData = mainData;
         titleStr = mainData.getTitle();
         authorStr = mainData.getAuthor();
         contentStr = StringUtil.getRealString(mainData.getContent());
@@ -154,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         transaction.add(R.id.dialog,fragment);
         transaction.commit();*/
         fragment.show(getSupportFragmentManager(),"Dialog");
-        hideBottomUiMenu();
+        //hideBottomUiMenu();
     }
 
     @Override
@@ -197,7 +200,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
                 Log.d("dingyl",dx+"dx");
                 if (dx >= leftMaxWidth/2){
                     openLeftLayout(leftMaxWidth-dx);
-                }else if (dx >= touchSlop && dx < leftMaxWidth/2){
+                }else if (dx >= touchSlop && dx < leftMaxWidth/2 && !isLeftMenuOpen){
                     closeLeftLayout(dx);
                 }else if (dx <= -touchSlop && dx >= -leftMaxWidth/2){
                     openLeftLayout(-dx);

@@ -2,11 +2,13 @@ package com.welson.artcleeveryday.fragment;
 
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.welson.artcleeveryday.MyApplication;
 import com.welson.artcleeveryday.R;
 import com.welson.artcleeveryday.activity.MainActivity;
 import com.welson.artcleeveryday.util.SharedPreferenceUtil;
@@ -30,11 +33,13 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
     private boolean isToday = false;
     private SharedPreferenceUtil sharedPreferenceUtil;
     private MainActivity activity;
+    private boolean isCollected = false;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         getDialog().getWindow().setWindowAnimations(R.style.right_dialog_anim);
+        //getDialog().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
         View view = inflater.inflate(R.layout.right_layout, container, false);
         initView(view);
         return view;
@@ -60,6 +65,17 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         getDialog().getWindow().setAttributes(lp);
         invalidate();
+        if (MyApplication.databaseUtil.getData(activity.currData.getDate().getCurr())!=null){
+            isCollected = true;
+        }else {
+            isCollected = false;
+        }
+        Log.d("dingyl","isCollected : " + isCollected);
+        if (isCollected){
+            collectButton.setImageView(R.drawable.right_collect_icon_red);
+        }else {
+            collectButton.setImageView(R.drawable.right_collect_icon);
+        }
     }
 
     private void initView(View view){
@@ -92,6 +108,7 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.collect_button:
+                MyApplication.databaseUtil.insertData(activity.currData);
                 getDialog().dismiss();
                 break;
             case R.id.share_button:
@@ -119,4 +136,5 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
                 break;
         }
     }
+
 }

@@ -43,4 +43,8 @@ public class RightButton extends LinearLayout {
         imageView.setImageResource(imageId);
         textView.setText(text);
     }
+
+    public void setImageView(int res){
+        imageView.setImageResource(res);
+    }
 }
