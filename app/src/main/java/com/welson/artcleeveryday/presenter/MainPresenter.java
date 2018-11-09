@@ -31,9 +31,7 @@ public class MainPresenter implements BasePresenter{
     private static final String TAG = MainPresenter.class.getSimpleName();
     private BaseView baseView;
     private ExecutorService singleExecutor;
-    private MainDatas mainDatas;
     private SharedPreferenceUtil sharedPreferenceUtil;
-    private String date;
 
     public MainPresenter(BaseView baseView, Context context){
         this.baseView = baseView;

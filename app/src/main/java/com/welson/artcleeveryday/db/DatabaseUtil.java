@@ -40,7 +40,8 @@ public class DatabaseUtil {
     }
 
     public MainData getData(int currentDate){
-        Cursor cursor = sqLiteDatabase.query(TABLE_NAME,null,"CURR_DATE=?",new String[]{currentDate+""},null,null,null);
+        Cursor cursor = sqLiteDatabase.query(TABLE_NAME,null,"CURR_DATE=?",
+                new String[]{String.valueOf(currentDate)},null,null,null);
         MainData mainData = new MainData();
         while (cursor.moveToNext()){
             MainData.Date date = mainData.new Date();
@@ -58,7 +59,8 @@ public class DatabaseUtil {
     }
 
     public void deleteData(int currentDate){
-        sqLiteDatabase.delete(DB_NAME,"CURR_DATE=?",new String[]{currentDate+""});
+        sqLiteDatabase.delete(TABLE_NAME,CURR_DATE+"=?"
+                ,new String[]{String.valueOf(currentDate)});
     }
 
     public void closeDatabase(){

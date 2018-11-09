@@ -20,6 +20,7 @@ import com.welson.artcleeveryday.MyApplication;
 import com.welson.artcleeveryday.R;
 import com.welson.artcleeveryday.activity.MainActivity;
 import com.welson.artcleeveryday.util.SharedPreferenceUtil;
+import com.welson.artcleeveryday.util.ToastUtil;
 import com.welson.artcleeveryday.view.RightButton;
 
 public class RightDialogFragment extends DialogFragment implements View.OnClickListener{
@@ -34,6 +35,7 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
     private SharedPreferenceUtil sharedPreferenceUtil;
     private MainActivity activity;
     private boolean isCollected = false;
+    private ToastUtil toastUtil;
 
     @Nullable
     @Override
@@ -53,10 +55,12 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
     }
 
     private void init(){
+        toastUtil = new ToastUtil(getContext());
         activity = (MainActivity)getActivity();
         sharedPreferenceUtil = new SharedPreferenceUtil(getContext());
         Window window = getDialog().getWindow();
         window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+        window.setDimAmount(0.25f); //设置外部背景
         DisplayMetrics dm = new DisplayMetrics();
         getActivity().getWindowManager().getDefaultDisplay().getMetrics(dm);
         WindowManager.LayoutParams lp = window.getAttributes();
@@ -65,7 +69,7 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
         lp.height = ViewGroup.LayoutParams.MATCH_PARENT;
         getDialog().getWindow().setAttributes(lp);
         invalidate();
-        if (MyApplication.databaseUtil.getData(activity.currData.getDate().getCurr())!=null){
+        if (MyApplication.databaseUtil.getData(activity.currData.getDate().getCurr()).getContent()!=null){
             isCollected = true;
         }else {
             isCollected = false;
@@ -108,7 +112,14 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.collect_button:
-                MyApplication.databaseUtil.insertData(activity.currData);
+                if (!isCollected){
+                    MyApplication.databaseUtil.insertData(activity.currData);
+                    toastUtil.setToastText(getString(R.string.collect_success));
+                }else {
+                    MyApplication.databaseUtil.deleteData(activity.currData.getDate().getCurr());
+                    toastUtil.setToastText(getString(R.string.uncollect_success));
+                }
+
                 getDialog().dismiss();
                 break;
             case R.id.share_button:

@@ -26,14 +26,14 @@ public class MyDBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         String sql = "create table article(id integer primary key autoincrement," +
-                "curr_date INTEGER," +
-                "prev_date INTEGER," +
-                "next_date INTEGER," +
-                "author TEXT," +
-                "title TEXT," +
-                "digest TEXT," +
-                "content TEXT," +
-                "wc INTEGER)";
+                DatabaseUtil.CURR_DATE + " INTEGER," +
+                DatabaseUtil.PREV_DATE + " INTEGER," +
+                DatabaseUtil.NEXT_DATE + " INTEGER," +
+                DatabaseUtil.AUTHOR + " TEXT," +
+                DatabaseUtil.TITLE + " TEXT," +
+                DatabaseUtil.DIGEST + " TEXT," +
+                DatabaseUtil.CONTENT + " TEXT," +
+                DatabaseUtil.WC + " INTEGER)";
         db.execSQL(sql);
     }
 
@@ -41,6 +41,4 @@ public class MyDBHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //TODO for upgrade database
     }
-
-
 }

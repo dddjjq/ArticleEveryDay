@@ -13,4 +13,6 @@
     <string name="right_random">随机</string>
     <string name="right_next">后一天</string>
     <string name="right_today">今日</string>
+    <string name="collect_success">收藏成功</string>
+    <string name="uncollect_success">取消收藏</string>
 </resources>
