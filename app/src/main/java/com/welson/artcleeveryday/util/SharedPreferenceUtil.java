@@ -58,4 +58,34 @@ public class SharedPreferenceUtil {
         editor.putString(Constants.CURRENT_DATE,currentDate);
         editor.apply();
     }
+
+    public synchronized void setTextSizeIdx(int idx){
+        editor = sharedPreferences.edit();
+        editor.putInt(Constants.TEXT_SIZE,idx);
+        editor.apply();
+    }
+
+    public synchronized int getTextSizeIdx(){
+        return sharedPreferences.getInt(Constants.TEXT_SIZE,1);
+    }
+
+    public synchronized void setBackColor(int idx){
+        editor = sharedPreferences.edit();
+        editor.putInt(Constants.BACK_COLOR,idx);
+        editor.apply();
+    }
+
+    public synchronized int getBackColor(){
+        return sharedPreferences.getInt(Constants.BACK_COLOR,0);
+    }
+
+    public synchronized void setEnableNightMode(boolean b){
+        editor = sharedPreferences.edit();
+        editor.putBoolean(Constants.NIGHT_MODE,b);
+        editor.apply();
+    }
+
+    public synchronized boolean getEnableNightMode(){
+        return sharedPreferences.getBoolean(Constants.NIGHT_MODE,false);
+    }
 }

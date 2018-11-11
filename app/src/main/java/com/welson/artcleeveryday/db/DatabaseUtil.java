@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 
 import com.welson.artcleeveryday.entity.MainData;
 
+import java.util.ArrayList;
+
 public class DatabaseUtil {
 
     private SQLiteDatabase sqLiteDatabase;
@@ -56,6 +58,27 @@ public class DatabaseUtil {
             mainData.setWc(cursor.getInt(cursor.getColumnIndex(WC)));
         }
         return mainData;
+    }
+
+    public ArrayList<MainData> getAllData(){
+        Cursor cursor = sqLiteDatabase.query(TABLE_NAME,null,null,
+                null,null,null,null);
+        ArrayList<MainData> mainDatas = new ArrayList<>();
+        while (cursor.moveToNext()){
+            MainData mainData = new MainData();
+            MainData.Date date = mainData.new Date();
+            date.setCurr(cursor.getInt(cursor.getColumnIndex(CURR_DATE)));
+            date.setPrev(cursor.getInt(cursor.getColumnIndex(PREV_DATE)));
+            date.setNext(cursor.getInt(cursor.getColumnIndex(NEXT_DATE)));
+            mainData.setDate(date);
+            mainData.setAuthor(cursor.getString(cursor.getColumnIndex(AUTHOR)));
+            mainData.setTitle(cursor.getString(cursor.getColumnIndex(TITLE)));
+            mainData.setDigest(cursor.getString(cursor.getColumnIndex(DIGEST)));
+            mainData.setContent(cursor.getString(cursor.getColumnIndex(CONTENT)));
+            mainData.setWc(cursor.getInt(cursor.getColumnIndex(WC)));
+            mainDatas.add(mainData);
+        }
+        return mainDatas;
     }
 
     public void deleteData(int currentDate){

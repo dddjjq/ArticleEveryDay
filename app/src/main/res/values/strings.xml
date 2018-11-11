@@ -15,4 +15,13 @@
     <string name="right_today">今日</string>
     <string name="collect_success">收藏成功</string>
     <string name="uncollect_success">取消收藏</string>
+    <string name="setting_text_size">字号</string>
+    <string name="setting_background">背景</string>
+    <string name="setting_night">夜间</string>
+    <string name="text_size_small">小</string>
+    <string name="text_size_middle">中</string>
+    <string name="text_size_large">大</string>
+    <string name="not_collect">还没有收藏文章</string>
+    <string name="collect_title_default">在澄澈明净的天空下</string>
+    <string name="collect_author_default">舒婷</string>
 </resources>

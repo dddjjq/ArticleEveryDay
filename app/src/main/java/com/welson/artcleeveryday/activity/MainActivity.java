@@ -2,6 +2,8 @@ package com.welson.artcleeveryday.activity;
 
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -12,15 +14,21 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.welson.artcleeveryday.MyApplication;
 import com.welson.artcleeveryday.R;
+import com.welson.artcleeveryday.constants.Constants;
 import com.welson.artcleeveryday.fragment.RightDialogFragment;
 import com.welson.artcleeveryday.entity.MainData;
+import com.welson.artcleeveryday.fragment.SettingDialogFragment;
 import com.welson.artcleeveryday.presenter.MainPresenter;
 import com.welson.artcleeveryday.util.DensityUtil;
+import com.welson.artcleeveryday.util.SharedPreferenceUtil;
 import com.welson.artcleeveryday.util.StringUtil;
+import com.welson.artcleeveryday.util.ToastUtil;
 import com.welson.artcleeveryday.view.BaseView;
 import com.welson.artcleeveryday.view.MainLinearLayout;
 import com.welson.artcleeveryday.view.MainScrollView;
@@ -29,7 +37,7 @@ import com.welson.artcleeveryday.view.MainToolbar;
 import java.lang.ref.WeakReference;
 
 public class MainActivity extends AppCompatActivity implements BaseView,
-        MainToolbar.OnRightClickListener,MainToolbar.OnLeftClickListener{
+        MainToolbar.OnRightClickListener,MainToolbar.OnLeftClickListener,View.OnClickListener{
 
     private static final String TAG = MainActivity.class.getSimpleName() + "-TAG";
     private TextView title,author,content,footer;
@@ -38,6 +46,11 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     private LinearLayout leftLayout;
     private LinearLayout articleLayout;
     private MainScrollView scrollView;
+    private LinearLayout collectItem;
+    private LinearLayout settingItem;
+    private LinearLayout commentItem;
+    private ImageView topLine;
+    private ImageView bottomLine;
     public MainPresenter presenter;
     private String titleStr,authorStr,contentStr,footerStr;
     private static int width,height;//屏幕宽度和高度
@@ -51,15 +64,25 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     private static final int scrollPeriod = 350;
     private boolean canMove = false;
     private RightDialogFragment fragment;
+    private SettingDialogFragment settingDialogFragment;
     private int touchSlop;
     public MainData currData;
+    private SharedPreferenceUtil sharedPreferenceUtil;
+    private ToastUtil toastUtil;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initView();
+        initSizeColor();
         initListener();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
     }
 
     @Override
@@ -67,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         super.onResume();
         initData();
         fragment = new RightDialogFragment();
+        settingDialogFragment = new SettingDialogFragment();
         //hideBottomUiMenu();
         //TODO for bottom UI
     }
@@ -79,24 +103,73 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         footer = findViewById(R.id.footer);
         mainLayout = findViewById(R.id.main_layout);
         leftLayout = findViewById(R.id.left_layout);
+        collectItem = findViewById(R.id.collect);
+        settingItem = findViewById(R.id.setting);
+        commentItem = findViewById(R.id.zan);
+        collectItem.setOnClickListener(this);
+        settingItem.setOnClickListener(this);
+        commentItem.setOnClickListener(this);
         scrollView = findViewById(R.id.scrollView);
         articleLayout = findViewById(R.id.article_layout);
         mainToolbar = findViewById(R.id.main_toolbar);
+        topLine = findViewById(R.id.top_line);
+        bottomLine = findViewById(R.id.bottom_line);
         mainToolbar.setOnLeftClickListener(this);
         mainToolbar.setOnRightClickListener(this);
         setSupportActionBar(mainToolbar);
+        toastUtil = new ToastUtil(this);
     }
 
     private void initData(){
         scrollView.setVisibility(View.GONE);
         presenter = new MainPresenter(this,this);
-        presenter.requestData();
+        if (getIntent().getStringExtra("curr_date")!=null){
+            String currDate = getIntent().getStringExtra("curr_date");
+            MainData mainData = MyApplication.databaseUtil.getData(Integer.parseInt(currDate));
+            showSuccess(mainData);
+            sharedPreferenceUtil.setCurrentDate(String.valueOf(mainData.getDate().getCurr()));
+            sharedPreferenceUtil.setBeforeDate(String.valueOf(mainData.getDate().getPrev()));
+            sharedPreferenceUtil.setNextDate(String.valueOf(mainData.getDate().getNext()));
+            Log.d("dingyl","curr_date : " + currDate);
+        }else {
+            presenter.requestData();
+        }
         DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
         width = displayMetrics.widthPixels;
         height = displayMetrics.heightPixels;
         handler = new LayoutHandler(this);
         touchSlop = DensityUtil.dp2px(this,ViewConfiguration.get(this).getScaledTouchSlop()) ;
-        Log.d("dingyl",touchSlop+"");
+    }
+
+    public void initSizeColor(){
+        sharedPreferenceUtil = new SharedPreferenceUtil(this);
+        int textSizeIdx = sharedPreferenceUtil.getTextSizeIdx();
+        int colorIdx = sharedPreferenceUtil.getBackColor();
+        boolean isNightMode = sharedPreferenceUtil.getEnableNightMode();
+        title.setTextSize(Constants.textSizesTitle[textSizeIdx]);
+        author.setTextSize(Constants.textSizesAuthor[textSizeIdx]);
+        footer.setTextSize(Constants.textSizesAuthor[textSizeIdx]);
+        content.setTextSize(Constants.textSizesContent[textSizeIdx]);
+        if (!isNightMode){
+            topLine.setBackgroundColor(Color.rgb(228,219,219));
+            bottomLine.setBackgroundColor(Color.rgb(228,219,219));
+            title.setTextColor(Constants.textColors[colorIdx]);
+            author.setTextColor(Constants.textColors[colorIdx]);
+            footer.setTextColor(Constants.textColors[colorIdx]);
+            content.setTextColor(Constants.textColors[colorIdx]);
+            mainLayout.setBackgroundColor(Constants.colors[colorIdx]);
+            articleLayout.setBackgroundColor(Constants.colors[colorIdx]);
+        }else {
+            topLine.setBackgroundColor(Color.rgb(70,70,70));
+            bottomLine.setBackgroundColor(Color.rgb(70,70,70));
+            title.setTextColor(Constants.nightTextColor);
+            author.setTextColor(Constants.nightTextColor);
+            footer.setTextColor(Constants.nightTextColor);
+            content.setTextColor(Constants.nightTextColor);
+            mainLayout.setBackgroundColor(Constants.nightBackColor);
+            articleLayout.setBackgroundColor(Constants.nightBackColor);
+        }
+
     }
 
     private void initListener(){
@@ -127,6 +200,7 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
+                scrollToTop();
                 scrollView.setVisibility(View.VISIBLE);
                 title.setText(titleStr);
                 author.setText(authorStr);
@@ -175,7 +249,6 @@ public class MainActivity extends AppCompatActivity implements BaseView,
                 dx = (int)(event.getRawX() - oldX);
 
                 if (dx < leftMaxWidth && canMove && dx >= touchSlop && !isLeftMenuOpen){
-                    //Log.d("dingyl","lef : " + leftLayout.getMeasuredWidth());
                     /*leftLayout.layout(-leftLayout.getWidth()+dx,leftLayout.getTop(),dx,leftLayout.getHeight());
                     mainLayout.layout(dx,mainLayout.getTop(),dx+mainLayout.getWidth(),mainLayout.getHeight());
                     leftLayout.invalidate();
@@ -197,7 +270,6 @@ public class MainActivity extends AppCompatActivity implements BaseView,
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                Log.d("dingyl",dx+"dx");
                 if (dx >= leftMaxWidth/2){
                     openLeftLayout(leftMaxWidth-dx);
                 }else if (dx >= touchSlop && dx < leftMaxWidth/2 && !isLeftMenuOpen){
@@ -224,7 +296,6 @@ public class MainActivity extends AppCompatActivity implements BaseView,
     }
 
     public void closeLeftLayout(int x){
-        Log.d("dingyl","closeLeftLayout x : " + x);
         AnimatorSet animatorSet = new AnimatorSet();
         ObjectAnimator animator1 = ObjectAnimator.ofFloat(mainLayout,"translationX",0);
         ObjectAnimator animator2 = ObjectAnimator.ofFloat(leftLayout,"translationX",0);
@@ -260,6 +331,26 @@ public class MainActivity extends AppCompatActivity implements BaseView,
         //handler.removeMessages(OPEN);
         //handler.sendEmptyMessageDelayed(CLOSE,0);
     }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            case R.id.collect:
+                smoothCloseLeftLayout();
+                Intent intent = new Intent(this,CollectActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.setting:
+                smoothCloseLeftLayout();
+                settingDialogFragment.show(getSupportFragmentManager(),"settingDialogFragment");
+                break;
+            case R.id.zan:
+                smoothCloseLeftLayout();
+                toastUtil.setToastText("点了个赞");
+                break;
+        }
+    }
+
     static class LayoutHandler extends Handler{
 
         WeakReference<MainActivity> reference;

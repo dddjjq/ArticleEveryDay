@@ -123,6 +123,7 @@ public class RightDialogFragment extends DialogFragment implements View.OnClickL
                 getDialog().dismiss();
                 break;
             case R.id.share_button:
+                // TODO for share
                 getDialog().dismiss();
                 break;
             case R.id.before_button:
