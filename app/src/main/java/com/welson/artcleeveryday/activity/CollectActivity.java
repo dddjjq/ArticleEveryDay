@@ -59,7 +59,7 @@ public class CollectActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(manager);
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(this,VERTICAL));
-        if (mainDataArrayList == null){
+        if (mainDataArrayList.size() == 0){
             collectText.setVisibility(View.VISIBLE);
         }else{
             collectText.setVisibility(View.GONE);
