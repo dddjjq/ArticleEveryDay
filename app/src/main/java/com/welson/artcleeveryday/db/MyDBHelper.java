@@ -25,7 +25,7 @@ public class MyDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql = "create table article(id integer primary key autoincrement," +
+        String sql = "create table "+DatabaseUtil.TABLE_NAME+"(id integer primary key autoincrement," +
                 DatabaseUtil.CURR_DATE + " INTEGER," +
                 DatabaseUtil.PREV_DATE + " INTEGER," +
                 DatabaseUtil.NEXT_DATE + " INTEGER," +

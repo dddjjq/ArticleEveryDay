@@ -57,6 +57,7 @@ public class DatabaseUtil {
             mainData.setContent(cursor.getString(cursor.getColumnIndex(CONTENT)));
             mainData.setWc(cursor.getInt(cursor.getColumnIndex(WC)));
         }
+        cursor.close();
         return mainData;
     }
 
@@ -78,6 +79,7 @@ public class DatabaseUtil {
             mainData.setWc(cursor.getInt(cursor.getColumnIndex(WC)));
             mainDatas.add(mainData);
         }
+        cursor.close();
         return mainDatas;
     }
 
